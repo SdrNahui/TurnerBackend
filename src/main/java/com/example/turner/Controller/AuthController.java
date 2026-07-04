@@ -29,9 +29,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request){
-        User u1 = userRepository.findByUsername(request.getUsername())
+        User u1 = userRepository.findByUsername(request.getUsername().trim())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        if(!passwordEncoder.matches(request.getPassword(), u1.getPassword())){
+        if(!passwordEncoder.matches(request.getPassword().trim(), u1.getPassword())){
             return ResponseEntity.status(401).build();
         }
         String token = jwtService.generateToken(u1.getUsername(), u1.getRole().name());
@@ -46,11 +46,11 @@ public class AuthController {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getCurrentPassword().trim(), user.getPassword())) {
             return ResponseEntity.status(401).body("Contraseña actual incorrecta");
         }
 
-        user.setUsername(request.getNewUsername() != null && !request.getNewUsername().isBlank()
+        user.setUsername(request.getNewUsername().trim() != null && !request.getNewUsername().isBlank()
                 ? request.getNewUsername() : user.getUsername());
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
